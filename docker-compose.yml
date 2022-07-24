@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  xdpdropper:
+    build: .
+    privileged: true
+    network_mode: host
+    environment:
+      - XDPDROPPER_IFACE=enp0s3
+    ports:
+      - "8080:8080" # default api port

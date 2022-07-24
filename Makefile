@@ -1,3 +1,5 @@
+APP="xdpdropper"
+
 # Obtain an absolute path to the directory of the Makefile.
 # Assume the Makefile is in the root of the repository.
 REPODIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
@@ -16,7 +18,7 @@ CONTAINER_ENGINE = docker
 IMAGE := quay.io/cilium/ebpf-builder
 VERSION := 1648566014
 
-.PHONY: all container-all container-shell generate
+.PHONY: all container-all container-shell generate build
 
 .DEFAULT_TARGET = container-all
 
@@ -42,3 +44,6 @@ generate: export BPF_CLANG := $(CLANG)
 generate: export BPF_CFLAGS := $(CFLAGS)
 generate:
 	cd pkg/xdp && go generate ./...
+
+build:
+	docker build -t ${APP}:build . -f ${REPODIR}/Dockerfile

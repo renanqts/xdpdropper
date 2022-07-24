@@ -5,10 +5,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/cilium/ebpf/link"
+	"github.com/renanqts/xdpdropper/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // $BPF_CLANG and $BPF_CFLAGS are set by the Makefile.
@@ -17,14 +18,15 @@ import (
 type XDP interface {
 	AddToDrop(string) error
 	RemoveFromDrop(string) error
+	Close()
 }
 
 type xdp struct {
 	objs bpfObjects
+	link link.Link
 }
 
 func New(ifaceName string) (XDP, error) {
-
 	// Look up the network interface by name.
 	iface, err := net.InterfaceByName(ifaceName)
 	if err != nil {
@@ -32,6 +34,7 @@ func New(ifaceName string) (XDP, error) {
 	}
 
 	// Load pre-compiled programs into the kernel.
+	logger.Log.Debug("xdp load program into the kernel")
 	objs := bpfObjects{}
 	err = loadBpfObjects(&objs, nil)
 	if err != nil {
@@ -40,6 +43,7 @@ func New(ifaceName string) (XDP, error) {
 	defer objs.Close()
 
 	// Attach the program.
+	logger.Log.Debug("xdp attach program", zap.String("iface", ifaceName))
 	l, err := link.AttachXDP(link.XDPOptions{
 		Program:   objs.XdpProgFunc,
 		Interface: iface.Index,
@@ -49,14 +53,21 @@ func New(ifaceName string) (XDP, error) {
 	}
 	defer l.Close()
 
-	log.Printf("Attached XDP program to iface %q (index %d)", iface.Name, iface.Index)
+	logger.Log.Info("XDP program attached", zap.String("iface", iface.Name), zap.Int("index", iface.Index))
 
 	return xdp{
 		objs: objs,
+		link: l,
 	}, nil
 }
 
+func (x xdp) Close() {
+	x.link.Close()
+	x.objs.Close()
+}
+
 func (x xdp) AddToDrop(strIP string) error {
+	logger.Log.Debug("xdp dropper add", zap.String("ip", strIP))
 	ip, err := ip2long(strIP)
 	if err != nil {
 		return err
@@ -67,6 +78,7 @@ func (x xdp) AddToDrop(strIP string) error {
 }
 
 func (x xdp) RemoveFromDrop(strIP string) error {
+	logger.Log.Debug("xdp dropper remove", zap.String("ip", strIP))
 	ip, err := ip2long(strIP)
 	if err != nil {
 		return err

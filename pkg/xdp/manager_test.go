@@ -5,8 +5,15 @@ import (
 	"net"
 	"testing"
 
+	"github.com/renanqts/xdpdropper/pkg/logger"
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	logConfig := logger.NewDefaultConfig()
+	logConfig.Level = "debug"
+	logger.Init(logConfig)
+}
 
 func TestOperations(t *testing.T) {
 	objs := bpfObjects{}
