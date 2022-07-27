@@ -4,14 +4,24 @@ This is a small implementation of a dropper via eBPF XDP.
 It provides a simple JSON API where an IP can be `add/remove` to be dropped,   
 meaning that all incoming packets in a certain interface with the source IP will be dropped.
 
+## Configuration
+This is a simple program, but some configuration is possible.   
+This is done via environment variables:
+
+| variable | description | type | default | required |
+|---|---|---|---|---|
+| `XDPDROPPER_ADDRESS` | `[address]:[port]` of the HTTP API | `string` | `0.0.0.0:8080` | `no` |
+| `XDPDROPPER_IFACE` | Name of the interface in which the packets should be dropped. The eBPF XDP program will be attached to this interface |  `string` | | `yes` |
+| `XDPDROPPER_LOGLEVEL` | Available log levels `INFO`, `DEBUG` | `string` | `INFO` | `yes` |
+
 ## API
 The current APIs available are:
 
 | context | method | content | return code |
-|---|---|---|---|---|
-| `/health` | `GET` | | 200 |
-| `/` | `POST` | `{"ip":"1.1.1.1"}` | 201 |
-| `/` | `DELETE` | `{"ip":"1.1.1.1"}` | 204 |
+|---|---|---|---|
+| `/health` | `GET` | `NA` | 200 |
+| `/drop` | `POST` | `{"ip":"1.1.1.1"}` | 201 |
+| `/drop` | `DELETE` | `{"ip":"1.1.1.1"}` | 204 |
 
 **Examples**:
 
