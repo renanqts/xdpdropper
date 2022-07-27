@@ -1,0 +1,28 @@
+name: release version
+
+on:
+  workflow_dispatch:
+    ref: 'refs/heads/main'
+    inputs:
+      release_tag:
+        description: 'Release tag following semver `X.Y.Z`'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: 'main'
+
+      - name: Create the release
+        uses: release-drafter/release-drafter@v5
+        with:
+          publish: false
+          tag: ${{ github.event.inputs.release_tag }}
+          version: ${{ github.event.inputs.release_tag }}
+          name: ${{ github.event.inputs.release_tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
