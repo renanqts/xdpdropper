@@ -18,7 +18,7 @@ CONTAINER_ENGINE = docker
 IMAGE := quay.io/cilium/ebpf-builder
 VERSION := 1648566014
 
-.PHONY: all container-all container-shell generate build
+.PHONY: all container-all container-shell generate build lint test
 
 .DEFAULT_TARGET = container-all
 
@@ -37,8 +37,6 @@ container-shell:
 		-v "${REPODIR}":/ebpf -w /ebpf \
 		"${IMAGE}:${VERSION}"
 
-all: generate
-
 # $BPF_CLANG is used in go:generate invocations.
 generate: export BPF_CLANG := $(CLANG)
 generate: export BPF_CFLAGS := $(CFLAGS)
@@ -47,3 +45,9 @@ generate:
 
 build:
 	docker build -t ${APP}:build . -f ${REPODIR}/Dockerfile
+
+lint:
+	golangci-lint run
+
+test:
+	go test -cover ./...
