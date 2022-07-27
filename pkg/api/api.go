@@ -30,7 +30,7 @@ type drop struct {
 	IP string `json:"ip"`
 }
 
-func New(config config.Config) (API, error) {
+func New(config config.Config) (a API, err error) {
 	xdp, err := xdp.New(config.Iface)
 	if err != nil {
 		return nil, err
@@ -43,11 +43,20 @@ func New(config config.Config) (API, error) {
 		ReadHeaderTimeout: time.Second * 1,
 	}
 
-	return api{
+	a = api{
 		httpServer: &server,
 		router:     router,
 		xdp:        xdp,
-	}, nil
+		wg:         new(sync.WaitGroup),
+	}
+
+	defer func() {
+		if err != nil {
+			a.Close()
+		}
+	}()
+
+	return a, err
 }
 
 func reqUnmarshal(w http.ResponseWriter, r *http.Request) (d drop, err error) {
