@@ -7,5 +7,34 @@ services:
     network_mode: host
     environment:
       - XDPDROPPER_IFACE=enp0s3
+      - XDPDROPPER_LOGLEVEL=debug
     ports:
       - "8080:8080" # default api port
+  
+  add:
+    image: alpine/curl
+    network_mode: host
+    depends_on:
+      - xdpdropper
+    command:
+      - -d 
+      - '{"ip":"1.1.1.1"}'
+      - -H
+      - "Content-Type: application/json"
+      - http://localhost:8080/add 
+      - -v
+
+  remove:
+    image: alpine/curl
+    network_mode: host
+    depends_on:
+      - add
+    command:
+      - -d 
+      - '{"ip":"1.1.1.1"}'
+      - -X
+      - DELETE
+      - -H
+      - "Content-Type: application/json"
+      - http://localhost:8080/remove 
+      - -v
