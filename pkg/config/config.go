@@ -39,7 +39,8 @@ func LoadConfig() (config Config, err error) {
 	viper.SetConfigFile(".")
 	err = viper.MergeInConfig()
 	if err != nil {
-		if _, ok := err.(viper.ConfigParseError); ok {
+		_, ok := err.(viper.ConfigParseError)
+		if ok {
 			return
 		}
 	}

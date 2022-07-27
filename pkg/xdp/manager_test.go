@@ -12,7 +12,7 @@ import (
 func init() {
 	logConfig := logger.NewDefaultConfig()
 	logConfig.Level = "debug"
-	logger.Init(logConfig)
+	_ = logger.Init(logConfig)
 }
 
 func TestOperations(t *testing.T) {

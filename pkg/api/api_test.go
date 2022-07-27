@@ -31,7 +31,7 @@ func (m *MockXDP) Close() {}
 func init() {
 	logConfig := logger.NewDefaultConfig()
 	logConfig.Level = "debug"
-	logger.Init(logConfig)
+	_ = logger.Init(logConfig)
 }
 
 func TestReqUnmarshal(t *testing.T) {

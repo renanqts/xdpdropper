@@ -19,7 +19,10 @@ func main() {
 
 	logConfig := logger.NewDefaultConfig()
 	logConfig.Level = config.LogLevel
-	logger.Init(logConfig)
+	err = logger.Init(logConfig)
+	if err != nil {
+		panic(err)
+	}
 
 	api, err := api.New(config)
 	if err != nil {

@@ -1,13 +1,10 @@
 package logger
 
 import (
-	"sync"
-
 	"go.uber.org/zap"
 )
 
 var singleton zap.Logger
-var once sync.Once
 
 type Config struct {
 	Encoding string
@@ -39,10 +36,12 @@ func Init(c *Config) error {
 		}
 		Log = log
 	} else {
-		Log.Sync()
+		_ = Log.Sync()
 	}
 
-	defer Log.Sync()
+	defer func() {
+		_ = Log.Sync()
+	}()
 	return nil
 }
 

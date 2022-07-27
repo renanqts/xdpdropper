@@ -20,7 +20,7 @@ type API interface {
 }
 
 type api struct {
-	wg         sync.WaitGroup
+	wg         *sync.WaitGroup
 	httpServer *http.Server
 	router     *mux.Router
 	xdp        xdp.XDP
