@@ -62,7 +62,7 @@ func TestReqUnmarshal(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest("POST", "/add", bytes.NewBuffer(tc.payload))
+			req := httptest.NewRequest("FOOBAR", "/drop", bytes.NewBuffer(tc.payload))
 			w := httptest.NewRecorder()
 			actualResult, err := reqUnmarshal(w, req)
 			if err == nil {
@@ -106,37 +106,37 @@ func TestAddRemove(t *testing.T) {
 	testCases := []struct {
 		name       string
 		api        api
-		operation  string
 		payload    drop
 		statusCode int
+		method     string
 	}{
 		{
 			name:       "add success",
 			api:        apiSuccess,
-			operation:  "add",
 			payload:    dropTest,
 			statusCode: http.StatusCreated,
+			method:     "POST",
 		},
 		{
 			name:       "add fail",
 			api:        apiFail,
-			operation:  "add",
 			payload:    dropTest,
 			statusCode: http.StatusInternalServerError,
+			method:     "POST",
 		},
 		{
 			name:       "remove sucess",
 			api:        apiSuccess,
-			operation:  "remove",
 			payload:    dropTest,
 			statusCode: http.StatusNoContent,
+			method:     "DELETE",
 		},
 		{
 			name:       "remove fail",
 			api:        apiFail,
-			operation:  "remove",
 			payload:    dropTest,
 			statusCode: http.StatusInternalServerError,
+			method:     "DELETE",
 		},
 	}
 
@@ -144,11 +144,10 @@ func TestAddRemove(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			payload, _ := json.Marshal(tc.payload)
 			w := httptest.NewRecorder()
-			if tc.operation == "add" {
-				req := httptest.NewRequest("POST", "/add", bytes.NewBuffer(payload))
+			req := httptest.NewRequest(tc.method, "/drop", bytes.NewBuffer(payload))
+			if tc.method == "POST" {
 				tc.api.add(w, req)
-			} else if tc.operation == "remove" {
-				req := httptest.NewRequest("POST", "/remove", bytes.NewBuffer(payload))
+			} else if tc.method == "DELETE" {
 				tc.api.remove(w, req)
 			}
 			resp := w.Result()

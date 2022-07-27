@@ -21,7 +21,7 @@ services:
       - '{"ip":"1.1.1.1"}'
       - -H
       - "Content-Type: application/json"
-      - http://localhost:8080/add 
+      - http://localhost:8080/drop
       - -v
 
   remove:
@@ -36,5 +36,5 @@ services:
       - DELETE
       - -H
       - "Content-Type: application/json"
-      - http://localhost:8080/remove 
+      - http://localhost:8080/drop
       - -v

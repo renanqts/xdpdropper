@@ -91,8 +91,8 @@ func (a api) Start() error {
 	a.wg.Add(1)
 
 	a.router.HandleFunc("/health", a.health).Methods("GET")
-	a.router.HandleFunc("/add", a.add).Methods("POST")
-	a.router.HandleFunc("/remove", a.remove).Methods("DELETE")
+	a.router.HandleFunc("/drop", a.add).Methods("POST")
+	a.router.HandleFunc("/drop", a.remove).Methods("DELETE")
 
 	logger.Log.Info("Starting http server", zap.String("address", a.httpServer.Addr))
 	go func() {
