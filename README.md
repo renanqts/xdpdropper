@@ -1,8 +1,14 @@
-# XDP network packet dropper via API
+# XDPDropper
 
 This is a small implementation of a dropper via eBPF XDP.   
 It provides a simple JSON API where an IP can be `add/remove` to be dropped,   
 meaning that all incoming packets in a certain interface with the source IP will be dropped.
+
+## What and Why eBPF XDP
+XDP is a technology that allows to attach eBPF programs to low-level hooks, implemented by network device drivers in the Linux kernel, as well as generic hooks that run after the device driver.
+
+XDP can be used to achieve high-performance packet processing in an eBPF architecture, in this case here, used to drop packets.   
+It can be very useful in case of DDoS attacks or others.   
 
 ## Configuration
 This is a simple program, but some configuration is possible.   
@@ -49,3 +55,7 @@ It also counts with a test via `docker-compose.yml`, it can be done:
 docker-compose up
 ```
 *it must be performed inside the VM.*
+
+## Reference
+- [eBPF XDP: The Basics and a Quick Tutorial](https://www.tigera.io/learn/guides/ebpf/ebpf-xdp/)
+- [BPF and XDP Reference Guide](https://docs.cilium.io/en/stable/bpf/)
