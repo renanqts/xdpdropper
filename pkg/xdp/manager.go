@@ -40,18 +40,16 @@ func New(ifaceName string) (XDP, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Fail loading eBPF program into the kernel: %s", err.Error())
 	}
-	defer objs.Close()
 
 	// Attach the program.
 	logger.Log.Debug("xdp attach program", zap.String("iface", ifaceName))
 	l, err := link.AttachXDP(link.XDPOptions{
-		Program:   objs.XdpProgFunc,
+		Program:   objs.XdpDropFunc,
 		Interface: iface.Index,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Fail attaching XDP program: %s", err.Error())
 	}
-	defer l.Close()
 
 	logger.Log.Info("XDP program attached", zap.String("iface", iface.Name), zap.Int("index", iface.Index))
 
@@ -73,7 +71,7 @@ func (x xdp) AddToDrop(strIP string) error {
 		return err
 	}
 	packetCount := int32(0) // As this is a new entry, set the counter to 0
-	err = x.objs.XdpStatsMap.Put(ip, packetCount)
+	err = x.objs.DropMap.Put(ip, packetCount)
 	return err
 }
 
@@ -83,7 +81,7 @@ func (x xdp) RemoveFromDrop(strIP string) error {
 	if err != nil {
 		return err
 	}
-	err = x.objs.XdpStatsMap.Delete(ip)
+	err = x.objs.DropMap.Delete(ip)
 	return err
 }
 

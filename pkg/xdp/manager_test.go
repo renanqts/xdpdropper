@@ -33,7 +33,7 @@ func TestOperations(t *testing.T) {
 		key   uint32
 		value uint32
 	)
-	iter := objs.XdpStatsMap.Iterate()
+	iter := xdp.objs.DropMap.Iterate()
 	for iter.Next(&key, &value) {
 		actualIP := int2ip(key) // IPv4 source address in network byte order.
 		actualCounter := value

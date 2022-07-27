@@ -117,35 +117,39 @@ func (a api) health(w http.ResponseWriter, r *http.Request) {
 func (a api) add(w http.ResponseWriter, r *http.Request) {
 	req, err := reqUnmarshal(w, r)
 	if err == nil {
+		logger.Log.Debug("api drop invocation", zap.String("ip", req.IP))
 		err = a.xdp.AddToDrop(req.IP)
 		if err == nil {
 			w.WriteHeader(http.StatusCreated)
 			logger.Log.Debug("add request", zap.Int("statusCode", http.StatusCreated))
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			logger.Log.Error(
-				"add request",
-				zap.Int("statusCode", http.StatusInternalServerError),
-				zap.Error(err),
-			)
+			return
 		}
 	}
+
+	w.WriteHeader(http.StatusInternalServerError)
+	logger.Log.Error(
+		"add request",
+		zap.Int("statusCode", http.StatusInternalServerError),
+		zap.Error(err),
+	)
 }
 
 func (a api) remove(w http.ResponseWriter, r *http.Request) {
 	req, err := reqUnmarshal(w, r)
 	if err == nil {
+		logger.Log.Debug("remove drop invocation", zap.String("ip", req.IP))
 		err = a.xdp.RemoveFromDrop(req.IP)
 		if err == nil {
 			w.WriteHeader(http.StatusNoContent)
 			logger.Log.Debug("add request", zap.Int("statusCode", http.StatusNoContent))
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			logger.Log.Error(
-				"remove request",
-				zap.Int("statusCode", http.StatusInternalServerError),
-				zap.Error(err),
-			)
+			return
 		}
 	}
+
+	w.WriteHeader(http.StatusInternalServerError)
+	logger.Log.Error(
+		"remove request",
+		zap.Int("statusCode", http.StatusInternalServerError),
+		zap.Error(err),
+	)
 }

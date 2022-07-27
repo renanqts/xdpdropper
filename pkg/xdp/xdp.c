@@ -5,15 +5,15 @@
 
 char __license[] SEC("license") = "Dual MIT/GPL";
 
-#define MAX_MAP_ENTRIES 16
+#define MAX_MAP_ENTRIES 1000 // It allows 1k entries
 
-/* Define an LRU hash map for storing packet by source IPv4 address */
+/* Define a hash map for storing packet by source IPv4 address */
 struct {
-	__uint(type, BPF_MAP_TYPE_LRU_HASH);
+	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, MAX_MAP_ENTRIES);
 	__type(key, __u32);   // source IPv4 address
 	__type(value, __u32); // packet count
-} xdp_stats_map SEC(".maps");
+} drop_map SEC(".maps");
 
 /*
 Attempt to parse the IPv4 source address from the packet.
@@ -47,14 +47,14 @@ static __always_inline int parse_ip_src_addr(struct xdp_md *ctx, __u32 *ip_src_a
 }
 
 SEC("xdp")
-int xdp_prog_func(struct xdp_md *ctx) {
+int xdp_drop_func(struct xdp_md *ctx) {
 	__u32 ip;
 	if (!parse_ip_src_addr(ctx, &ip)) {
 		// Not an IPv4 packet, so do nothing.
 		goto done;
 	}
 
-	__u32 *pkt_count = bpf_map_lookup_elem(&xdp_stats_map, &ip);
+	__u32 *pkt_count = bpf_map_lookup_elem(&drop_map, &ip);
 	if (pkt_count) {
 		// IP was found blacklisted.
 		// so increment the counters atomically using an LLVM built-in
