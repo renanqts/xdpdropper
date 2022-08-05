@@ -8,8 +8,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/renanqts/xdpdropper/pkg/config"
 	"github.com/renanqts/xdpdropper/pkg/logger"
+	"github.com/renanqts/xdpdropper/pkg/metrics"
 	"github.com/renanqts/xdpdropper/pkg/xdp"
 	"go.uber.org/zap"
 )
@@ -100,6 +102,14 @@ func (a api) Start() error {
 	a.wg.Add(1)
 
 	a.router.HandleFunc("/health", a.health).Methods("GET")
+
+	if err := metrics.Register(); err != nil {
+		logger.Log.Error("Failed to register Prometheus metrics",
+			zap.Error(err))
+	}
+	a.router.Handle("/metrics", promhttp.Handler())
+	logger.Log.Debug("Prometheus metrics registered")
+
 	a.router.HandleFunc("/drop", a.add).Methods("POST")
 	a.router.HandleFunc("/drop", a.remove).Methods("DELETE")
 
