@@ -6,9 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/cilium/ebpf/link"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/renanqts/xdpdropper/pkg/logger"
+	"github.com/renanqts/xdpdropper/pkg/metrics"
 	"go.uber.org/zap"
 )
 
@@ -53,10 +56,15 @@ func New(ifaceName string) (XDP, error) {
 
 	logger.Log.Info("XDP program attached", zap.String("iface", iface.Name), zap.Int("index", iface.Index))
 
-	return xdp{
+	xdp := xdp{
 		objs: objs,
 		link: l,
-	}, nil
+	}
+
+	metric := metrics.NewGaugeVec("dropped_packets", "xdp", "number of droppped packets", []string{"ip"})
+	go xdp.measures(metric)
+
+	return &xdp, nil
 }
 
 func (x xdp) Close() {
@@ -85,6 +93,23 @@ func (x xdp) RemoveFromDrop(strIP string) error {
 	return err
 }
 
+func (x xdp) measures(g *prometheus.GaugeVec) {
+	var (
+		key         uint32
+		packetCount uint32
+	)
+	// get counters each 10 seconds
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+	for range ticker.C {
+		iter := x.objs.DropMap.Iterate()
+		for iter.Next(&key, &packetCount) {
+			src_ip := int2ip(key)
+			g.WithLabelValues(src_ip).Add(float64(packetCount))
+		}
+	}
+}
+
 func ip2long(ipAddr string) (uint32, error) {
 	ip := net.ParseIP(ipAddr)
 	if ip == nil {
@@ -92,4 +117,10 @@ func ip2long(ipAddr string) (uint32, error) {
 	}
 	ip = ip.To4()
 	return binary.BigEndian.Uint32(ip), nil
+}
+
+func int2ip(nn uint32) string {
+	ip := make(net.IP, 4)
+	binary.BigEndian.PutUint32(ip, nn)
+	return ip.String()
 }

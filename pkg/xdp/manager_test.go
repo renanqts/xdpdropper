@@ -1,8 +1,6 @@
 package xdp
 
 import (
-	"encoding/binary"
-	"net"
 	"testing"
 
 	"github.com/renanqts/xdpdropper/pkg/logger"
@@ -46,10 +44,4 @@ func TestOperations(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, false, iter.Next(&key, &value))
 
-}
-
-func int2ip(nn uint32) string {
-	ip := make(net.IP, 4)
-	binary.BigEndian.PutUint32(ip, nn)
-	return ip.String()
 }
