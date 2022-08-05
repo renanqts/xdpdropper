@@ -56,6 +56,14 @@ docker-compose up
 ```
 *it must be performed inside the VM.*
 
+### eBPF debug
+In the case of BPF debug, use `bpf_printk` function.
+It is simmilar to Printf.   
+The output should show up at `/sys/kernel/debug/tracing/trace_pipe`.
+```bash
+sudo cat /sys/kernel/debug/tracing/trace_pipe
+```
+
 ## Reference
 - [eBPF XDP: The Basics and a Quick Tutorial](https://www.tigera.io/learn/guides/ebpf/ebpf-xdp/)
 - [BPF and XDP Reference Guide](https://docs.cilium.io/en/stable/bpf/)

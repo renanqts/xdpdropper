@@ -1,6 +1,7 @@
 package xdp
 
 import (
+	"net"
 	"testing"
 
 	"github.com/renanqts/xdpdropper/pkg/logger"
@@ -28,14 +29,14 @@ func TestOperations(t *testing.T) {
 	assert.Nil(t, err)
 
 	var (
-		key   uint32
+		key   []byte
 		value uint32
 	)
 	iter := xdp.objs.DropMap.Iterate()
 	for iter.Next(&key, &value) {
-		actualIP := int2ip(key) // IPv4 source address in network byte order.
+		actualIP := net.IP(key) // IPv4 source address in network byte order.
 		actualCounter := value
-		assert.Equal(t, expectedIP, actualIP)
+		assert.Equal(t, expectedIP, actualIP.String())
 		assert.Equal(t, uint32(0), actualCounter)
 	}
 	assert.Nil(t, iter.Err())
@@ -43,5 +44,4 @@ func TestOperations(t *testing.T) {
 	err = xdp.RemoveFromDrop(expectedIP)
 	assert.Nil(t, err)
 	assert.Equal(t, false, iter.Next(&key, &value))
-
 }

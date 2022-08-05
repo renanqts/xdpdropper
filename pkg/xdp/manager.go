@@ -2,8 +2,6 @@
 package xdp
 
 import (
-	"encoding/binary"
-	"errors"
 	"fmt"
 	"net"
 	"time"
@@ -74,28 +72,22 @@ func (x xdp) Close() {
 
 func (x xdp) AddToDrop(strIP string) error {
 	logger.Log.Debug("xdp dropper add", zap.String("ip", strIP))
-	ip, err := ip2long(strIP)
-	if err != nil {
-		return err
-	}
+	ip := ip2Byte(strIP)
 	packetCount := int32(0) // As this is a new entry, set the counter to 0
-	err = x.objs.DropMap.Put(ip, packetCount)
+	err := x.objs.DropMap.Put(ip, packetCount)
 	return err
 }
 
 func (x xdp) RemoveFromDrop(strIP string) error {
 	logger.Log.Debug("xdp dropper remove", zap.String("ip", strIP))
-	ip, err := ip2long(strIP)
-	if err != nil {
-		return err
-	}
-	err = x.objs.DropMap.Delete(ip)
+	ip := ip2Byte(strIP)
+	err := x.objs.DropMap.Delete(ip)
 	return err
 }
 
 func (x xdp) measures(g *prometheus.GaugeVec) {
 	var (
-		key         uint32
+		key         []byte
 		packetCount uint32
 	)
 	// get counters each 10 seconds
@@ -104,23 +96,12 @@ func (x xdp) measures(g *prometheus.GaugeVec) {
 	for range ticker.C {
 		iter := x.objs.DropMap.Iterate()
 		for iter.Next(&key, &packetCount) {
-			src_ip := int2ip(key)
-			g.WithLabelValues(src_ip).Add(float64(packetCount))
+			src_ip := net.IP(key)
+			g.WithLabelValues(src_ip.String()).Add(float64(packetCount))
 		}
 	}
 }
 
-func ip2long(ipAddr string) (uint32, error) {
-	ip := net.ParseIP(ipAddr)
-	if ip == nil {
-		return 0, errors.New("wrong ipAddr format")
-	}
-	ip = ip.To4()
-	return binary.BigEndian.Uint32(ip), nil
-}
-
-func int2ip(nn uint32) string {
-	ip := make(net.IP, 4)
-	binary.BigEndian.PutUint32(ip, nn)
-	return ip.String()
+func ip2Byte(ip string) []byte {
+	return net.ParseIP(ip).To4()
 }

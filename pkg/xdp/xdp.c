@@ -3,7 +3,7 @@
 #include "bpf_endian.h"
 #include "common.h"
 
-char __license[] SEC("license") = "Dual MIT/GPL";
+char __license[] SEC("license") = "GPL";
 
 #define MAX_MAP_ENTRIES 1000 // It allows 1k entries
 
@@ -27,17 +27,23 @@ static __always_inline int parse_ip_src_addr(struct xdp_md *ctx, __u32 *ip_src_a
 	// First, parse the ethernet header.
 	struct ethhdr *eth = data;
 	if ((void *)(eth + 1) > data_end) {
+		// use to debug
+		// bpf_printk("Failed to parse the ethernet header");
 		return 0;
 	}
 
+	// The protocol is not IPv4, so we can't parse an IPv4 source address.
 	if (eth->h_proto != bpf_htons(ETH_P_IP)) {
-		// The protocol is not IPv4, so we can't parse an IPv4 source address.
+		// use to debug
+		// bpf_printk("The protocol is not IPv4");	
 		return 0;
 	}
 
 	// Then parse the IP header.
 	struct iphdr *ip = (void *)(eth + 1);
 	if ((void *)(ip + 1) > data_end) {
+		// use to debug
+		// bpf_printk("Failed to parse the IP header");
 		return 0;
 	}
 
