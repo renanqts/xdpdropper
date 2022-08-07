@@ -1,0 +1,6 @@
+apiVersion: v2
+name: xdpdropper
+description: XDPDropper helm chart
+type: application
+version: 0.0.2
+appVersion: 0.0.2
