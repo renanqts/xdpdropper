@@ -26,6 +26,7 @@ The current APIs available are:
 | context | method | content | return code |
 |---|---|---|---|
 | `/health` | `GET` | `NA` | 200 |
+| `/metrics` | `GET` | `NA` | 200 |
 | `/drop` | `POST` | `{"ip":"1.1.1.1"}` | 201 |
 | `/drop` | `DELETE` | `{"ip":"1.1.1.1"}` | 204 |
 
