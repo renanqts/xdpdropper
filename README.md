@@ -34,12 +34,12 @@ The current APIs available are:
 
 Dropping incoming packets with the source IP `1.1.1.1`
 ```shell
-curl -d '{"ip":"1.1.1.1"}' -H "Content-Type: application/json" http://localhost:8080/ -v
+curl -d '{"ip":"1.1.1.1"}' -H "Content-Type: application/json" http://localhost:8080/drop -v
 ```
 
 To remove the IP from the list:
 ```shell
-curl -d '{"ip":"1.1.1.1"}' -X DELETE -H "Content-Type: application/json" http://localhost:8080/ -v
+curl -d '{"ip":"1.1.1.1"}' -X DELETE -H "Content-Type: application/json" http://localhost:8080/drop -v
 ```
 
 ## Local tests
